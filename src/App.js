@@ -18,7 +18,7 @@ const stripePromise = loadStripe(
 );
 
 function App() {
-  const [{}, dispatch] = useStateValue();
+  const [{ user }, dispatch] = useStateValue();
 
   useEffect(() => {
     // will only run once when the app component loads...
@@ -68,8 +68,8 @@ function App() {
             </Elements>
           </Route>
           <Route path="/">
-            <Header />
-            <Home />
+            {user ? <Header /> : null}
+            {user ? <Home /> : <Login />}
           </Route>
         </Switch>
       </div>
