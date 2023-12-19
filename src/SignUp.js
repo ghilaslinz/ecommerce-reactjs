@@ -35,9 +35,15 @@ export default function SignUp() {
     const history = useHistory();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [isChecked, setIsChecked] = useState(false); // state for checkbox validation
 
     const register = e => {
         e.preventDefault();
+
+        if (!isChecked) {
+          alert('Please agree to the terms and conditions to proceed.');
+          return;
+      }
     
         auth
             .createUserWithEmailAndPassword(email, password)
@@ -105,7 +111,10 @@ export default function SignUp() {
               </Grid>
               <Grid item xs={12}>
                 <FormControlLabel
-                  control={<Checkbox value="allowExtraEmails" color="primary" />}
+                  control={<Checkbox 
+                      color="primary" 
+                      onChange={e => setIsChecked(e.target.checked)} 
+                      />}
                   label="By signing-in you agree to the Conditions of Use & Sale. Please
                   see our Privacy Notice, our Cookies Notice and our Interest-Based Ads Notice."
                 />
