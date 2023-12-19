@@ -7,14 +7,30 @@ import { useStateValue } from "./StateProvider";
 import { auth } from "./firebase";
 import logo from './logo.png';
 import { white } from '@mui/material/colors';
+
+const saveBasketToLocal = (userId, basket) => {
+  localStorage.setItem(`basket_${userId}`, JSON.stringify(basket));
+};
+
+const loadBasketFromLocal = (userId) => {
+  return JSON.parse(localStorage.getItem(`basket_${userId}`)) || [];
+};
+
 function Header() {
   const [{ basket, user }, dispatch] = useStateValue();
 
   const handleAuthenticaton = () => {
     if (user) {
+      // Save current basket to localStorage
+      saveBasketToLocal(user.uid, basket);
+  
+      // Sign out
       auth.signOut();
     }
   }
+  
+  
+  
 
   return (
     <div className="header">

@@ -3,20 +3,29 @@ import "./Product.css";
 import { useStateValue } from "./StateProvider";
 
 function Product({ id, title, image, price, rating }) {
-  const [{ basket }, dispatch] = useStateValue();
+  const [{ basket, user }, dispatch] = useStateValue();
 
   const addToBasket = () => {
-    // dispatch the item into the data layer
+    // New item to add
+    const newItem = {
+      id: id,
+      title: title,
+      image: image,
+      price: price,
+      rating: rating,
+    };
+
+    // Dispatch the item into the data layer
     dispatch({
       type: "ADD_TO_BASKET",
-      item: {
-        id: id,
-        title: title,
-        image: image,
-        price: price,
-        rating: rating,
-      },
+      item: newItem,
     });
+
+    // Update basket in localStorage
+    if (user) {
+      const updatedBasket = [...basket, newItem];
+      localStorage.setItem(`basket_${user.uid}`, JSON.stringify(updatedBasket));
+    }
   };
 
   return (
@@ -24,7 +33,6 @@ function Product({ id, title, image, price, rating }) {
       <div className="product__info">
         <p>{title}</p>
         <p className="product__price">
-        
           <strong>{price}</strong>
           <small>€</small>
         </p>
@@ -32,7 +40,7 @@ function Product({ id, title, image, price, rating }) {
           {Array(rating)
             .fill()
             .map((_, i) => (
-              <p>🌟</p>
+              <p key={i}>🌟</p>
             ))}
         </div>
       </div>

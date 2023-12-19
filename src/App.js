@@ -17,31 +17,47 @@ const stripePromise = loadStripe(
  "pk_test_51HPvU9DFg5koCdLGJJbNo60QAU99BejacsvnKvT8xnCu1wFLCuQP3WBArscK3RvSQmSIB3N0Pbsc7TtbQiJ1vaOi00X9sIbazL"
 );
 
+const saveBasketToLocal = (userId, basket) => {
+  localStorage.setItem(`basket_${userId}`, JSON.stringify(basket));
+};
+
+const loadBasketFromLocal = (userId) => {
+  return JSON.parse(localStorage.getItem(`basket_${userId}`)) || [];
+};
+
+
 function App() {
   const [{ user }, dispatch] = useStateValue();
 
   useEffect(() => {
-    // will only run once when the app component loads...
-
     auth.onAuthStateChanged((authUser) => {
-      console.log("THE USER IS >>> ", authUser);
-
       if (authUser) {
-        // the user just logged in / the user was logged in
-
+        // User logged in
         dispatch({
           type: "SET_USER",
           user: authUser,
         });
+  
+        // Load user's basket from localStorage
+        const userBasket = loadBasketFromLocal(authUser.uid);
+        dispatch({
+          type: 'SET_BASKET',
+          basket: userBasket,
+        });
       } else {
-        // the user is logged out
+        // User logged out
         dispatch({
           type: "SET_USER",
           user: null,
         });
+        dispatch({
+          type: 'EMPTY_BASKET',
+        });
       }
     });
-  }, []);
+  }, [dispatch]);
+  
+  
 
   return (
     <Router>

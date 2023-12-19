@@ -10,12 +10,20 @@ export const getBasketTotal = (basket) =>
 const reducer = (state, action) => {
   console.log(action);
   switch (action.type) {
-    case "ADD_TO_BASKET":
+    case 'ADD_TO_BASKET':
+      // Corrected for adding a single item
       return {
         ...state,
         basket: [...state.basket, action.item],
       };
     
+    case 'SET_BASKET':
+      // New case for setting the entire basket
+      return {
+        ...state,
+        basket: action.basket,
+      };
+
     case 'EMPTY_BASKET':
       return {
         ...state,
@@ -30,10 +38,9 @@ const reducer = (state, action) => {
 
       if (index >= 0) {
         newBasket.splice(index, 1);
-
       } else {
         console.warn(
-          `Cant remove product (id: ${action.id}) as its not in basket!`
+          `Can't remove product (id: ${action.id}) as it's not in basket!`
         )
       }
 
