@@ -16,3 +16,13 @@
   padding: 10px;
   border-bottom: 1px solid lightgray;
 }
+
+.checkout__emptyMessage{
+  display: flex;
+  align-items: center;
+  margin-top : 10px;
+}
+
+.checkout__emptyMessage p{
+  margin-right: 10px;
+}

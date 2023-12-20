@@ -4,6 +4,7 @@ import Subtotal from "./Subtotal";
 import { useStateValue } from "./StateProvider";
 import CheckoutProduct from "./CheckoutProduct";
 import { useHistory } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
 function Checkout() {
   const [{ basket, user }, dispatch] = useStateValue();
@@ -25,26 +26,31 @@ function Checkout() {
         <div>
           <h3>Hello, {user?.email}</h3>
           <h2 className="checkout__title">Your shopping Basket</h2>
-
-          {basket && basket.map((item, index) => (
-  item && (
-    <CheckoutProduct
-      key={index}
-      id={item.id}
-      title={item.title}
-      image={item.image}
-      price={item.price}
-      rating={item.rating}
-    />
-  )
-))}
+        
+          {basket.length > 0 ? (
+            basket.map((item, index) => (
+              <CheckoutProduct
+                key={index}
+                id={item.id}
+                title={item.title}
+                image={item.image}
+                price={item.price}
+                rating={item.rating}
+              />
+            ))
+          ) : (
+            <div className="checkout__emptyMessage">
+            <p>Your basket is empty.</p>
+            <Link to="/">Start shopping now!</Link>
+          </div>
+          )}
 
 
         </div>
       </div>
 
       <div className="checkout__right">
-        <Subtotal />
+      {basket.length > 0 && <Subtotal />}
       </div>
     </div>
   );
