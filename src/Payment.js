@@ -20,67 +20,97 @@ function Payment() {
     const [processing, setProcessing] = useState("");
     const [error, setError] = useState(null);
     const [disabled, setDisabled] = useState(true);
-    const [clientSecret, setClientSecret] = useState(true);
+    const [clientSecret, setClientSecret] = useState("");
 
     useEffect(() => {
-        // generate the special stripe secret which allows us to charge a customer
         const getClientSecret = async () => {
-            const response = await axios({
-                method: 'post',
-                // Stripe expects the total in a currencies subunits
-                url: `/payments/create?total=${getBasketTotal(basket) * 100}`
-            });
-            setClientSecret(response.data.clientSecret)
+            try {
+                const response = await axios({
+                    method: 'post',
+                    url: `/payments/create?total=${getBasketTotal(basket) * 100}`
+                });
+                setClientSecret(response.data.clientSecret);
+            } catch (error) {
+                console.error("Error fetching client secret:", error);
+            }
         }
-
+    
         getClientSecret();
-    }, [basket])
+    }, [basket]);
+    
+    
+    useEffect(() => {
+        console.log("Fetched Client Secret:", clientSecret);
+    }, [clientSecret]); // Th
 
     console.log('THE SECRET IS >>>', clientSecret)
     console.log('👱', user)
 
     const handleSubmit = async (event) => {
-        // do all the fancy stripe stuff...
         event.preventDefault();
         setProcessing(true);
-
-        const payload = await stripe.confirmCardPayment(clientSecret, {
-            payment_method: {
-                card: elements.getElement(CardElement)
+        console.log("Client Secret on Frontend:", clientSecret);
+        // Check if Stripe, elements, clientSecret, and user UID are available
+        if (!stripe ) {
+            console.error("Missing required stripe information for payment processing");
+            setError("Payment processing error. Please try again.");
+            setProcessing(false);
+            return;
+        } else if(!elements){
+            console.error("Missing required elements information for payment processing");
+            setError("Payment processing error. Please try again.");
+            setProcessing(false);
+        }else if(!clientSecret){
+            console.error("Missing required clientssecret information for payment processing");
+            setError("Payment processing error. Please try again.");
+            setProcessing(false);
+        }else if(!user?.uid){
+            console.error("Missing required user id information for payment processing");
+            setError("Payment processing error. Please try again.");
+            setProcessing(false);
+        }
+    
+        try {
+            const payload = await stripe.confirmCardPayment(clientSecret, {
+                payment_method: {
+                    card: elements.getElement(CardElement)
+                }
+            });
+    
+            if (payload.error) {
+                setError(payload.error.message);
+                setProcessing(false);
+            } else if (payload.paymentIntent.status === 'succeeded') {
+                // Firebase operation
+                db.collection('users')
+                  .doc(user.uid)
+                  .collection('orders')
+                  .doc(payload.paymentIntent.id)
+                  .set({
+                      basket: basket,
+                      amount: payload.paymentIntent.amount,
+                      created: payload.paymentIntent.created
+                  });
+    
+                setSucceeded(true);
+                setError(null);
+                setProcessing(false);
+                dispatch({ type: 'EMPTY_BASKET' });
+                history.replace('/orders');
             }
-        }).then(({paymentIntent}) => {
-            // paymentIntent = payment confirmation
-
-            db.collection('users')
-              .doc(user?.uid)
-              .collection('orders')
-              .doc(paymentIntent.id)
-              .set({
-                  basket:basket,
-                  amount:paymentIntent.amount,
-                  created:paymentIntent.created
-              })
-
-            setSucceeded(true);
-            setError(null)
-            setProcessing(false)
-
-            dispatch({
-                type: 'EMPTY_BASKET'
-            })
-
-            history.replace('/orders')
-        })
-
-    }
+        } catch (error) {
+            console.error("Error processing payment:", error);
+            setError("Payment failed. Please try again.");
+            setProcessing(false);
+        }
+    };
+    
 
     const handleChange = event => {
         // Listen for changes in the CardElement
-        // and display any errors as the customer types their card details
         setDisabled(event.empty);
         setError(event.error ? event.error.message : "");
-    }
-
+    };
     return (
         <div className='payment'>
             <div className='payment__container'>

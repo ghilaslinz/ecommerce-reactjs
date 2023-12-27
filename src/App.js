@@ -14,7 +14,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import SignUp from "./SignUp";
 
 const stripePromise = loadStripe(
- "pk_test_51HPvU9DFg5koCdLGJJbNo60QAU99BejacsvnKvT8xnCu1wFLCuQP3WBArscK3RvSQmSIB3N0Pbsc7TtbQiJ1vaOi00X9sIbazL"
+ "pk_test_51OPnXfCtmH0NLR6yUWaDFt6BcsLTsV3sHEpgPHwaOESz0xEy9ah0MSwXVOqQ06GC5sXbn7pkdfWLmPWvfvBbdlyc009t33ehWU"
 );
 
 const saveBasketToLocal = (userId, basket) => {
